@@ -1,0 +1,45 @@
+use std::collections::HashMap;
+use std::hash::Hash;
+
+struct NFT {
+    id: u32,
+    issuer: String,
+    owner: String,
+}
+
+struct NFTContract {
+    nfts: HashMap<u32, NFT>,
+    royalty_rate: f32,
+    issuer_wallet: String,
+}
+
+impl NFTContract {
+    fn new(royalty_rate: f32, issuer_wallet: String) -> Self {
+        Self {
+            nfts: HashMap::new(),
+            royalty_rate,
+            issuer_wallet,
+        }
+    }
+
+    fn mint_nft(&mut self, id: u32, issuer: String, owner: String) {
+        let nft = NFT { id, issuer, owner };
+        self.nfts.insert(id, nft);
+    }
+
+    fn transfer_nft(&mut self, id: u32, new_owner: String) {
+        let nft = self.nfts.get_mut(&id);
+        if nft.is_some() {
+            nft.owner = new_owner;
+        }
+    }
+
+    fn use_nft(&mut self, id: u32) {
+        let nft = self.nfts.get(&id);
+        if nft.is_some() && nft.issuer == self.issuer_wallet {
+            let royalty = nft.price * self.royalty_rate;
+            // Transfer royalty to the issuer's wallet
+            // ...
+        }
+    }
+}
