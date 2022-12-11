@@ -1,0 +1,60 @@
+// import necessary crates
+extern crate ink;
+
+// use the `ink` crate
+use ink::{
+    env,
+    memory::string::{String, ToString},
+    storage,
+};
+
+// define the contract
+#[ink(storage)]
+struct DeadManSwitch {
+    // define wallet address A
+    wallet_a: storage::Value<String>,
+
+    // define wallet address B
+    wallet_b: storage::Value<String>,
+
+    // define timestamp for when contract was deployed
+    deployment_timestamp: storage::Value<u64>,
+}
+
+// implement the contract
+#[ink(event)]
+impl DeadManSwitch {
+    // constructor to set wallet addresses and deployment timestamp
+    #[ink(constructor)]
+    fn new(&mut self, wallet_a: String, wallet_b: String) {
+        self.wallet_a.set(wallet_a);
+        self.wallet_b.set(wallet_b);
+        self.deployment_timestamp.set(env::now());
+    }
+
+    // function to transfer balance from wallet A to B
+    #[ink(message)]
+    fn transfer_balance(&mut self) -> bool {
+        // get current timestamp
+        let current_timestamp = env::now();
+
+        // calculate difference between current and deployment timestamps
+        let timestamp_diff = current_timestamp - self.deployment_timestamp.get();
+
+        // check if difference is greater than or equal to 3 months (in seconds)
+        if timestamp_diff >= 3 * 30 * 24 * 60 * 60 {
+            // transfer balance from wallet A to B
+            env::transfer_balance(
+                &self.wallet_a.get().to_string(),
+                &self.wallet_b.get().to_string(),
+                env::balance(),
+            );
+
+            // return true to indicate transfer was successful
+            return true;
+        } else {
+            // return false to indicate transfer was not performed
+            return false;
+        }
+    }
+}
