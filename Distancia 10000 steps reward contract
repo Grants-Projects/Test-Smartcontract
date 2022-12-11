@@ -1,0 +1,43 @@
+use std::collections::HashMap;
+use std::hash::Hash;
+
+struct User {
+    id: u32,
+    wallet: String,
+    steps: u32,
+}
+
+struct MarketValue {
+    token_b: f32,
+}
+
+struct RewardsContract {
+    users: HashMap<u32, User>,
+    market_value: MarketValue,
+}
+
+impl RewardsContract {
+    fn new(market_value: MarketValue) -> Self {
+        Self {
+            users: HashMap::new(),
+            market_value,
+        }
+    }
+
+    fn register_user(&mut self, id: u32, wallet: String) {
+        let user = User { id, wallet, steps: 0 };
+        self.users.insert(id, user);
+    }
+
+    fn add_steps(&mut self, id: u32, steps: u32) {
+        let user = self.users.get_mut(&id);
+        if user.is_some() {
+            user.steps += steps;
+            if user.steps >= 10000 {
+                let reward = user.steps / 10000 * self.market_value.token_b;
+                // Transfer reward to the user's wallet
+                // ...
+            }
+        }
+    }
+}
