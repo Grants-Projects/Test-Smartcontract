@@ -1,0 +1,78 @@
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Advert {
+    id: u32,
+    completed: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Reward {
+    id: u32,
+    amount: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct State {
+    adverts: HashMap<u32, Advert>,
+    rewards: Vec<Reward>,
+    wallet_address: String,
+}
+
+impl State {
+    fn new(wallet_address: String) -> Self {
+        let adverts = HashMap::new();
+        let rewards = Vec::new();
+
+        Self {
+            adverts,
+            rewards,
+            wallet_address,
+        }
+    }
+
+    fn add_advert(&mut self, id: u32) {
+        let advert = Advert { id, completed: false };
+        self.adverts.insert(id, advert);
+    }
+
+    fn complete_advert(&mut self, id: u32) {
+        let advert = self.adverts.get_mut(&id);
+        if let Some(advert) = advert {
+            advert.completed = true;
+        }
+    }
+
+    fn reward_wallet(&mut self, reward_id: u32, reward_amount: u32) {
+        let reward = Reward {
+            id: reward_id,
+            amount: reward_amount,
+        };
+        self.rewards.push(reward);
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_state() {
+        let mut state = State::new("wallet_address".to_string());
+
+        // Add an advert
+        state.add_advert(1);
+        assert_eq!(state.adverts.len(), 1);
+
+        // Complete the advert
+        state.complete_advert(1);
+        assert!(state.adverts[&1].completed);
+
+        // Reward the wallet
+        state.reward_wallet(1, 100);
+        assert_eq!(state.rewards.len(), 1);
+        assert_eq!(state.rewards[0].amount, 100);
+    }
+}
