@@ -1,0 +1,27 @@
+use std::collections::HashMap;
+
+struct NFT {
+    // The ID of the NFT
+    id: u64,
+    // The wallet address of the issuer of the NFT
+    issuer: Address,
+    // The amount of royalties earned by the issuer
+    royalties: f64,
+}
+
+struct SmartContract {
+    // A mapping of NFT IDs to the corresponding NFTs
+    nfts: HashMap<u64, NFT>,
+    // The total amount of royalties earned by all NFT issuers
+    total_royalties: f64,
+}
+
+impl SmartContract {
+    // This function is called when an NFT is used. It increments the royalties
+    // for the issuer of the NFT by 2.5% of the total royalties earned by all
+    // NFT issuers.
+    fn on_nft_used(&mut self, id: u64) {
+        let nft = self.nfts.get_mut(id).expect("NFT does not exist");
+        nft.royalties += self.total_royalties * 0.025;
+    }
+}
